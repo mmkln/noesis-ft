@@ -1,0 +1,256 @@
+:root {
+  color: #211f29;
+  background: #f7f5fb;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+button {
+  color: inherit;
+  font: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.topbar {
+  position: fixed;
+  z-index: 20;
+  inset: 0 0 auto;
+  height: 56px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(247, 245, 251, 0.86);
+  border-bottom: 1px solid rgba(60, 50, 85, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.brand {
+  font-size: 15px;
+  letter-spacing: 0.04em;
+}
+
+.account {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #655f70;
+  font-size: 13px;
+}
+
+.account span {
+  max-width: min(42vw, 320px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.centered {
+  position: fixed;
+  inset: 56px 0 0;
+  display: grid;
+  place-content: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.entry-card {
+  width: min(390px, calc(100vw - 40px));
+  padding: 42px 38px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(79, 62, 119, 0.1);
+  border-radius: 28px;
+  box-shadow: 0 24px 70px rgba(49, 34, 83, 0.1);
+}
+
+.entry-mark {
+  width: 38px;
+  height: 38px;
+  margin: 0 auto 22px;
+  display: block;
+  background: radial-gradient(circle at 35% 30%, #9f8ce2, #6046b2 62%, #37246f);
+  border-radius: 50%;
+  box-shadow: 0 0 0 9px rgba(112, 85, 197, 0.08);
+}
+
+.entry-card h1 {
+  margin: 0 0 10px;
+  font-size: clamp(25px, 5vw, 34px);
+  letter-spacing: -0.035em;
+}
+
+.entry-card p {
+  margin: 0 0 26px;
+  color: #716a7e;
+}
+
+.primary-action,
+.spatial-toolbar button,
+#sign-out {
+  padding: 8px 13px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(68, 55, 100, 0.12);
+  border-radius: 11px;
+  box-shadow: 0 5px 16px rgba(46, 31, 80, 0.06);
+  cursor: pointer;
+}
+
+.primary-action {
+  padding: 10px 20px;
+  color: #fff;
+  background: #6650b5;
+  border-color: #6650b5;
+}
+
+.primary-action:hover,
+.spatial-toolbar button:hover,
+#sign-out:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(46, 31, 80, 0.11);
+}
+
+.primary-action:focus-visible,
+.spatial-toolbar button:focus-visible,
+#sign-out:focus-visible,
+.spatial-world:focus-visible {
+  outline: 2px solid rgba(112, 85, 197, 0.46);
+  outline-offset: 2px;
+}
+
+.spatial-world {
+  position: fixed;
+  inset: 56px 0 0;
+  overflow: hidden;
+  outline: none;
+}
+
+.spatial-canvas,
+.spatial-label-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.spatial-canvas {
+  cursor: grab;
+  touch-action: none;
+}
+
+.spatial-canvas:active,
+.spatial-canvas.is-node-dragging {
+  cursor: grabbing;
+}
+
+.spatial-canvas.is-node-hovered:not(.is-node-dragging) {
+  cursor: pointer;
+}
+
+.spatial-label-layer {
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.spatial-label {
+  --spatial-kind-color: #248af0;
+  position: absolute;
+  max-width: 220px;
+  padding: 4px 7px;
+  overflow: hidden;
+  color: #554e66;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid color-mix(
+    in srgb,
+    var(--spatial-kind-color) 24%,
+    transparent
+  );
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(8px);
+}
+
+.spatial-label.is-selected {
+  color: #211f29;
+  border-color: var(--spatial-kind-color);
+  box-shadow: 0 4px 18px rgba(38, 27, 66, 0.16);
+}
+
+.spatial-label.is-neighbour:not(.is-selected) {
+  color: #2f2938;
+}
+
+.spatial-label.is-connection-source,
+.spatial-label.is-connection-target {
+  border-color: var(--spatial-kind-color);
+}
+
+.spatial-toolbar {
+  position: fixed;
+  z-index: 10;
+  top: 72px;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.empty-state {
+  position: fixed;
+  inset: 56px 0 0;
+  display: grid;
+  place-content: center;
+  color: #716a7e;
+  pointer-events: none;
+}
+
+.status {
+  position: fixed;
+  z-index: 30;
+  right: 16px;
+  bottom: 16px;
+  max-width: min(420px, calc(100vw - 32px));
+  margin: 0;
+  color: #655c74;
+  font-size: 13px;
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  .topbar {
+    padding: 0 12px;
+  }
+
+  .account {
+    gap: 8px;
+  }
+
+  .account span {
+    max-width: 42vw;
+  }
+
+  .spatial-toolbar {
+    top: 66px;
+    left: 10px;
+  }
+}
