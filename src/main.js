@@ -1,7 +1,8 @@
 import './styles.css';
 
+import { createAccountMenu } from './account-menu.js';
 import { loadGraph } from './api/graph-api.js';
-import { restoreSession, signOut, startLogin } from './auth/auth-client.js';
+import { restoreSession, startLogin } from './auth/auth-client.js';
 import { graphToSpatialGraph } from './domain/spatial-adapter.js';
 import { SpatialLayoutMode } from './spatial/spatial-layout-mode.js';
 
@@ -10,9 +11,8 @@ const loginView = document.querySelector('#login-view');
 const loadingView = document.querySelector('#loading-view');
 const graphView = document.querySelector('#graph-view');
 const spatialWorld = document.querySelector('#spatial-world');
-const accountEmail = document.querySelector('#account-email');
+const accountMenuHost = document.querySelector('#account-menu-host');
 const signInButton = document.querySelector('#sign-in');
-const signOutButton = document.querySelector('#sign-out');
 const fitGraphButton = document.querySelector('#fit-graph');
 const resetCameraButton = document.querySelector('#reset-camera');
 const emptyState = document.querySelector('#empty-state');
@@ -21,10 +21,22 @@ const statusElement = document.querySelector('#status');
 let selectedNodeId = null;
 let spatialView = null;
 let spatialViewPromise = null;
+let disposeAccountMenu = () => {};
 
 
 function setStatus(message = '') {
   statusElement.textContent = message;
+}
+
+
+function renderAccountMenu(account = null, { sessionChecking = false } = {}) {
+  disposeAccountMenu();
+  const accountMenu = createAccountMenu(account, {
+    sessionChecking,
+    onSignedOut: showSignedOut,
+  });
+  accountMenuHost.replaceChildren(accountMenu.menu);
+  disposeAccountMenu = accountMenu.dispose;
 }
 
 
@@ -65,8 +77,7 @@ function showSignedOut() {
   loadingView.hidden = true;
   graphView.hidden = true;
   loginView.hidden = false;
-  accountEmail.textContent = '';
-  signOutButton.hidden = true;
+  renderAccountMenu();
   selectedNodeId = null;
   spatialView?.setSelectedThought(null);
   spatialView?.deactivate();
@@ -74,8 +85,7 @@ function showSignedOut() {
 
 
 async function showGraph(account) {
-  accountEmail.textContent = account.email;
-  signOutButton.hidden = false;
+  renderAccountMenu(account);
   setStatus('Loading your knowledge graph…');
 
   const graph = await loadGraph();
@@ -113,14 +123,11 @@ async function initialize() {
 
 
 signInButton.addEventListener('click', () => startLogin());
-signOutButton.addEventListener('click', async () => {
-  await signOut();
-  showSignedOut();
-});
 fitGraphButton.addEventListener('click', () => {
   if (!spatialView?.fitAll()) setStatus('The knowledge graph is empty.');
 });
 resetCameraButton.addEventListener('click', () => spatialView?.resetView());
 window.addEventListener('beforeunload', () => spatialView?.deactivate());
 
+renderAccountMenu(null, { sessionChecking: true });
 void initialize();
