@@ -28,28 +28,9 @@ button {
   display: none !important;
 }
 
-.topbar {
-  position: fixed;
-  z-index: 20;
-  inset: 0 0 auto;
-  height: 56px;
-  padding: 0 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(247, 245, 251, 0.86);
-  border-bottom: 1px solid rgba(60, 50, 85, 0.08);
-  backdrop-filter: blur(18px);
-}
-
-.brand {
-  font-size: 15px;
-  letter-spacing: 0.04em;
-}
-
 .centered {
   position: fixed;
-  inset: 56px 0 0;
+  inset: 0;
   display: grid;
   place-content: center;
   padding: 24px;
@@ -118,7 +99,7 @@ button {
 
 .spatial-world {
   position: fixed;
-  inset: 56px 0 0;
+  inset: 0;
   overflow: hidden;
   outline: none;
 }
@@ -190,10 +171,11 @@ button {
 .spatial-toolbar {
   position: fixed;
   z-index: 10;
-  top: 72px;
-  left: 16px;
+  top: 18px;
+  left: 50%;
   display: flex;
   gap: 8px;
+  transform: translateX(-50%);
 }
 
 .account-menu {
@@ -361,7 +343,7 @@ button {
 
 .empty-state {
   position: fixed;
-  inset: 56px 0 0;
+  inset: 0;
   display: grid;
   place-content: center;
   color: #716a7e;
@@ -381,17 +363,13 @@ button {
 }
 
 @media (max-width: 600px) {
-  .topbar {
-    padding: 0 12px;
-  }
-
   .account-menu {
     top: 12px;
     right: 12px;
   }
 
   .spatial-toolbar {
-    top: 66px;
-    left: 10px;
+    top: 12px;
+    left: 50%;
   }
 }
