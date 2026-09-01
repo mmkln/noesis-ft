@@ -5,8 +5,16 @@ import { loadGraph } from './api/graph-api.js';
 import { restoreSession, startLogin } from './auth/auth-client.js';
 import { graphToSpatialGraph } from './domain/spatial-adapter.js';
 import { SpatialLayoutMode } from './spatial/spatial-layout-mode.js';
+import {
+  ThemeMode,
+  nextThemeMode,
+  normalizeThemeMode,
+  resolveTheme,
+} from './theme.js';
 
 
+const THEME_STORAGE_KEY = 'noesis:theme:v1';
+const systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
 const loginView = document.querySelector('#login-view');
 const loadingView = document.querySelector('#loading-view');
 const graphView = document.querySelector('#graph-view');
@@ -17,15 +25,53 @@ const fitGraphButton = document.querySelector('#fit-graph');
 const resetCameraButton = document.querySelector('#reset-camera');
 const emptyState = document.querySelector('#empty-state');
 const statusElement = document.querySelector('#status');
+const themeButton = document.querySelector('#theme-button');
 
 let selectedNodeId = null;
 let spatialView = null;
 let spatialViewPromise = null;
 let disposeAccountMenu = () => {};
+let themeMode = normalizeThemeMode(document.documentElement.dataset.themeMode);
+let resolvedTheme = resolveTheme(themeMode, systemThemeQuery.matches);
 
 
 function setStatus(message = '') {
   statusElement.textContent = message;
+}
+
+
+function renderThemeButton() {
+  const labels = {
+    [ThemeMode.SYSTEM]: 'System',
+    [ThemeMode.LIGHT]: 'Light',
+    [ThemeMode.DARK]: 'Dark',
+  };
+  const label = labels[themeMode];
+  themeButton.dataset.mode = themeMode;
+  themeButton.title = `Appearance: ${label}`;
+  themeButton.setAttribute('aria-label', `Appearance: ${label}`);
+}
+
+
+function applyTheme() {
+  resolvedTheme = resolveTheme(themeMode, systemThemeQuery.matches);
+  document.documentElement.dataset.theme = resolvedTheme;
+  document.documentElement.dataset.themeMode = themeMode;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute(
+    'content',
+    resolvedTheme === ThemeMode.DARK ? '#0e0d14' : '#f9f8fe',
+  );
+  spatialView?.setTheme(resolvedTheme);
+  renderThemeButton();
+}
+
+
+function storeThemeMode() {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, themeMode);
+  } catch {
+    // The selected theme still applies for this session when storage is disabled.
+  }
 }
 
 
@@ -47,7 +93,7 @@ async function ensureSpatialView() {
       .then(({ createSpatialView }) => {
         spatialView = createSpatialView({
           container: spatialWorld,
-          theme: 'light',
+          theme: resolvedTheme,
           storageKey: 'noesis:spatial-camera:v1',
           layoutStorageKey: 'noesis:spatial-layout:v1:',
           layoutMode: SpatialLayoutMode.CONSTELLATIONS,
@@ -127,7 +173,16 @@ fitGraphButton.addEventListener('click', () => {
   if (!spatialView?.fitAll()) setStatus('The knowledge graph is empty.');
 });
 resetCameraButton.addEventListener('click', () => spatialView?.resetView());
+themeButton.addEventListener('click', () => {
+  themeMode = nextThemeMode(themeMode);
+  storeThemeMode();
+  applyTheme();
+});
+systemThemeQuery.addEventListener('change', () => {
+  if (themeMode === ThemeMode.SYSTEM) applyTheme();
+});
 window.addEventListener('beforeunload', () => spatialView?.deactivate());
 
+applyTheme();
 renderAccountMenu(null, { sessionChecking: true });
 void initialize();
