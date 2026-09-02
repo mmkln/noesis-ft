@@ -33,6 +33,7 @@ export function graphToSpatialGraph(graph) {
         sourceId: relation.sourceId,
         targetId: relation.targetId,
         kind: relation.kind,
+        label: typeof relation.label === 'string' ? relation.label : '',
         spacing: 'normal',
       };
     });
@@ -47,6 +48,7 @@ export function graphToSpatialGraph(graph) {
         text: typeof node.title === 'string' && node.title
           ? node.title
           : 'Untitled knowledge',
+        body: typeof node.body === 'string' ? node.body : '',
         kind: node.kind,
         radius: Math.min(
           13,

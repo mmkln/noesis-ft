@@ -7,7 +7,7 @@ import { graphToSpatialGraph } from './domain/spatial-adapter.js';
 test('maps Noesis nodes and relations into the Spatial contract', () => {
   const graph = graphToSpatialGraph({
     nodes: [
-      { id: 'claim', title: 'A claim', kind: 'claim' },
+      { id: 'claim', title: 'A claim', body: 'Claim details', kind: 'claim' },
       { id: 'evidence', title: 'Evidence', kind: 'evidence' },
     ],
     relations: [
@@ -16,6 +16,7 @@ test('maps Noesis nodes and relations into the Spatial contract', () => {
         sourceId: 'evidence',
         targetId: 'claim',
         kind: 'supports',
+        label: 'Based on interview',
       },
     ],
   });
@@ -26,9 +27,11 @@ test('maps Noesis nodes and relations into the Spatial contract', () => {
     sourceId: 'evidence',
     targetId: 'claim',
     kind: 'supports',
+    label: 'Based on interview',
     spacing: 'normal',
   }]);
   assert.equal(graph.nodes[0].text, 'A claim');
+  assert.equal(graph.nodes[0].body, 'Claim details');
   assert.ok(graph.nodes[0].radius > 7);
 });
 

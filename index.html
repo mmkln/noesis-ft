@@ -77,6 +77,79 @@
           <p>Drag a node · Drag the background to rotate · Scroll to zoom</p>
         </div>
 
+        <div class="spatial-inspector-stack">
+          <aside
+            class="spatial-inspector"
+            id="node-inspector"
+            aria-label="Selected knowledge node"
+            hidden
+          >
+            <header class="spatial-inspector-header">
+              <span
+                class="spatial-inspector-kind"
+                id="node-inspector-kind"
+                aria-hidden="true"
+              ><span></span></span>
+              <span
+                class="spatial-inspector-kind-label"
+                id="node-inspector-kind-label"
+              ></span>
+              <button
+                id="node-inspector-close"
+                type="button"
+                aria-label="Close node details"
+              >×</button>
+            </header>
+            <div class="spatial-inspector-body">
+              <h2 id="node-inspector-title"></h2>
+              <p id="node-inspector-body"></p>
+              <button
+                class="spatial-inspector-focus"
+                id="node-inspector-focus"
+                type="button"
+                aria-label="Focus selected node"
+                aria-keyshortcuts="F"
+                title="Focus selected node (F)"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 9V6a2 2 0 0 1 2-2h3"></path>
+                  <path d="M15 4h3a2 2 0 0 1 2 2v3"></path>
+                  <path d="M20 15v3a2 2 0 0 1-2 2h-3"></path>
+                  <path d="M9 20H6a2 2 0 0 1-2-2v-3"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <span>Focus in Spatial</span>
+                <kbd aria-hidden="true">F</kbd>
+              </button>
+            </div>
+          </aside>
+
+          <aside
+            class="spatial-connections-island"
+            id="node-inspector-connections"
+            aria-labelledby="node-inspector-connections-title"
+            hidden
+          >
+            <button
+              class="spatial-connections-toggle"
+              id="node-inspector-connections-toggle"
+              type="button"
+              aria-controls="node-inspector-connection-list"
+              aria-expanded="true"
+            >
+              <span id="node-inspector-connections-title">Connections</span>
+              <span id="node-inspector-connections-count"></span>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="m4 6 4 4 4-4"></path>
+              </svg>
+            </button>
+            <div
+              class="spatial-connections-list"
+              id="node-inspector-connection-list"
+            ></div>
+          </aside>
+        </div>
+
         <p id="empty-state" class="empty-state" hidden>
           Your knowledge graph is empty.
         </p>

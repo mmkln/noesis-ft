@@ -3,6 +3,7 @@ import './styles.css';
 import { createAccountMenu } from './account-menu.js';
 import { loadGraph } from './api/graph-api.js';
 import { restoreSession, startLogin } from './auth/auth-client.js';
+import { buildNodeDetails } from './domain/node-details.js';
 import { graphToSpatialGraph } from './domain/spatial-adapter.js';
 import { SpatialLayoutMode } from './spatial/spatial-layout-mode.js';
 import {
@@ -26,13 +27,26 @@ const resetCameraButton = document.querySelector('#reset-camera');
 const emptyState = document.querySelector('#empty-state');
 const statusElement = document.querySelector('#status');
 const themeButton = document.querySelector('#theme-button');
+const nodeInspector = document.querySelector('#node-inspector');
+const nodeInspectorKind = document.querySelector('#node-inspector-kind');
+const nodeInspectorKindLabel = document.querySelector('#node-inspector-kind-label');
+const nodeInspectorTitle = document.querySelector('#node-inspector-title');
+const nodeInspectorBody = document.querySelector('#node-inspector-body');
+const nodeInspectorClose = document.querySelector('#node-inspector-close');
+const nodeInspectorFocus = document.querySelector('#node-inspector-focus');
+const nodeInspectorConnections = document.querySelector('#node-inspector-connections');
+const nodeInspectorConnectionsToggle = document.querySelector('#node-inspector-connections-toggle');
+const nodeInspectorConnectionsCount = document.querySelector('#node-inspector-connections-count');
+const nodeInspectorConnectionList = document.querySelector('#node-inspector-connection-list');
 
 let selectedNodeId = null;
+let activeSpatialGraph = { nodes: [], links: [] };
 let spatialView = null;
 let spatialViewPromise = null;
 let disposeAccountMenu = () => {};
 let themeMode = normalizeThemeMode(document.documentElement.dataset.themeMode);
 let resolvedTheme = resolveTheme(themeMode, systemThemeQuery.matches);
+let connectionsCollapsed = window.matchMedia('(max-width: 600px)').matches;
 
 
 function setStatus(message = '') {
@@ -75,6 +89,93 @@ function storeThemeMode() {
 }
 
 
+function renderConnectionsCollapsedState() {
+  nodeInspectorConnections.classList.toggle('is-collapsed', connectionsCollapsed);
+  nodeInspectorConnectionsToggle.setAttribute(
+    'aria-expanded',
+    String(!connectionsCollapsed),
+  );
+  nodeInspectorConnectionList.hidden = connectionsCollapsed;
+}
+
+
+function createConnectionRow(connection) {
+  const button = document.createElement('button');
+  const kind = document.createElement('span');
+  const copy = document.createElement('span');
+  const title = document.createElement('strong');
+  const relation = document.createElement('small');
+  const direction = document.createElement('span');
+  const incoming = connection.direction === 'incoming';
+
+  button.type = 'button';
+  button.className = 'spatial-connection-row';
+  button.dataset.nodeId = connection.nodeId;
+  button.title = connection.nodeTitle;
+  button.setAttribute(
+    'aria-label',
+    `${incoming ? 'From' : 'To'}: ${connection.nodeTitle}. ${connection.relationLabel}`,
+  );
+
+  kind.className = 'spatial-connection-kind';
+  kind.dataset.kind = connection.nodeKind;
+  kind.setAttribute('aria-hidden', 'true');
+
+  copy.className = 'spatial-connection-copy';
+  title.textContent = connection.nodeTitle;
+  relation.textContent = connection.relationLabel;
+  copy.append(title, relation);
+
+  direction.className = 'spatial-connection-direction';
+  direction.textContent = incoming ? '←' : '→';
+  direction.setAttribute('aria-hidden', 'true');
+
+  button.append(kind, copy, direction);
+  return button;
+}
+
+
+function renderNodeInspector() {
+  const details = buildNodeDetails(activeSpatialGraph, selectedNodeId);
+  nodeInspector.hidden = !details;
+  nodeInspectorConnectionList.replaceChildren();
+  nodeInspectorConnections.hidden = !details?.connections.length;
+  if (!details) return;
+
+  nodeInspectorKind.dataset.kind = details.kind;
+  nodeInspectorKindLabel.textContent = details.kindLabel;
+  nodeInspectorTitle.textContent = details.title;
+  nodeInspectorBody.textContent = details.body || 'No description yet.';
+  nodeInspectorBody.classList.toggle('is-empty', !details.body);
+
+  details.connections.forEach((connection) => {
+    nodeInspectorConnectionList.append(createConnectionRow(connection));
+  });
+  nodeInspectorConnectionsCount.textContent = String(details.connections.length);
+  if (details.connections.length) renderConnectionsCollapsedState();
+}
+
+
+function clearNodeSelection({ restoreFocus = false } = {}) {
+  selectedNodeId = null;
+  spatialView?.setSelectedThought(null);
+  renderNodeInspector();
+  if (restoreFocus) spatialWorld.focus({ preventScroll: true });
+}
+
+
+function selectNode(nodeId, { focus = false } = {}) {
+  if (!buildNodeDetails(activeSpatialGraph, nodeId)) {
+    clearNodeSelection();
+    return;
+  }
+  selectedNodeId = nodeId;
+  spatialView?.setSelectedThought(nodeId);
+  renderNodeInspector();
+  if (focus) spatialView?.focusThought(nodeId);
+}
+
+
 function renderAccountMenu(account = null, { sessionChecking = false } = {}) {
   disposeAccountMenu();
   const accountMenu = createAccountMenu(account, {
@@ -98,11 +199,10 @@ async function ensureSpatialView() {
           layoutStorageKey: 'noesis:spatial-layout:v1:',
           layoutMode: SpatialLayoutMode.CONSTELLATIONS,
           onThoughtSelect(nodeId) {
-            selectedNodeId = nodeId;
-            spatialView.setSelectedThought(selectedNodeId);
+            selectNode(nodeId);
           },
           onThoughtActivate(nodeId) {
-            spatialView.focusThought(nodeId);
+            selectNode(nodeId, { focus: true });
           },
           onError(message) {
             setStatus(message);
@@ -124,8 +224,8 @@ function showSignedOut() {
   graphView.hidden = true;
   loginView.hidden = false;
   renderAccountMenu();
-  selectedNodeId = null;
-  spatialView?.setSelectedThought(null);
+  activeSpatialGraph = { nodes: [], links: [] };
+  clearNodeSelection();
   spatialView?.deactivate();
 }
 
@@ -136,6 +236,8 @@ async function showGraph(account) {
 
   const graph = await loadGraph();
   const spatialGraph = graphToSpatialGraph(graph);
+  activeSpatialGraph = spatialGraph;
+  if (!buildNodeDetails(activeSpatialGraph, selectedNodeId)) selectedNodeId = null;
 
   loginView.hidden = true;
   loadingView.hidden = true;
@@ -149,6 +251,7 @@ async function showGraph(account) {
     fitAfterLayout: true,
   });
   view.activate();
+  renderNodeInspector();
   setStatus('');
 }
 
@@ -173,6 +276,20 @@ fitGraphButton.addEventListener('click', () => {
   if (!spatialView?.fitAll()) setStatus('The knowledge graph is empty.');
 });
 resetCameraButton.addEventListener('click', () => spatialView?.resetView());
+nodeInspectorClose.addEventListener('click', () => {
+  clearNodeSelection({ restoreFocus: true });
+});
+nodeInspectorFocus.addEventListener('click', () => {
+  if (selectedNodeId) spatialView?.focusThought(selectedNodeId);
+});
+nodeInspectorConnectionsToggle.addEventListener('click', () => {
+  connectionsCollapsed = !connectionsCollapsed;
+  renderConnectionsCollapsedState();
+});
+nodeInspectorConnectionList.addEventListener('click', (event) => {
+  const row = event.target.closest('[data-node-id]');
+  if (row) selectNode(row.dataset.nodeId, { focus: true });
+});
 themeButton.addEventListener('click', () => {
   themeMode = nextThemeMode(themeMode);
   storeThemeMode();
@@ -180,6 +297,26 @@ themeButton.addEventListener('click', () => {
 });
 systemThemeQuery.addEventListener('change', () => {
   if (themeMode === ThemeMode.SYSTEM) applyTheme();
+});
+document.addEventListener('pointerdown', (event) => {
+  if (event.target.classList.contains('spatial-canvas')) clearNodeSelection();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && selectedNodeId) {
+    clearNodeSelection({ restoreFocus: true });
+    return;
+  }
+  if (
+    event.key.toLowerCase() === 'f'
+    && selectedNodeId
+    && !event.ctrlKey
+    && !event.metaKey
+    && !event.altKey
+    && !event.target.closest('input, textarea, [contenteditable="true"]')
+  ) {
+    event.preventDefault();
+    spatialView?.focusThought(selectedNodeId);
+  }
 });
 window.addEventListener('beforeunload', () => spatialView?.deactivate());
 
