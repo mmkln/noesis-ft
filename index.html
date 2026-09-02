@@ -69,9 +69,12 @@
           aria-label="Knowledge graph"
         ></div>
 
-        <div class="spatial-toolbar" aria-label="Graph controls">
-          <button id="fit-graph" type="button">Fit all</button>
-          <button id="reset-camera" type="button">Reset view</button>
+        <div class="spatial-toolbar" role="toolbar" aria-label="Spatial graph controls">
+          <div class="spatial-toolbar-actions">
+            <button id="fit-graph" type="button">Fit all</button>
+            <button id="reset-camera" type="button">Reset</button>
+          </div>
+          <p>Drag a node · Drag the background to rotate · Scroll to zoom</p>
         </div>
 
         <p id="empty-state" class="empty-state" hidden>

@@ -115,40 +115,24 @@ button {
   color: var(--text-secondary);
 }
 
-.primary-action,
-.spatial-toolbar button {
-  padding: 8px 13px;
-  color: var(--text-secondary);
-  background: var(--surface-translucent);
-  border: 1px solid var(--border-subtle);
+.primary-action {
+  padding: 10px 20px;
+  color: #fff;
+  background: var(--accent);
+  border: 1px solid var(--accent);
   border-radius: 11px;
   box-shadow: var(--shadow-control), inset 0 1px var(--inset-highlight);
   cursor: pointer;
 }
 
-.primary-action {
-  padding: 10px 20px;
-  color: #fff;
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.primary-action:hover,
-.spatial-toolbar button:hover {
-  color: var(--accent-hover);
-  background: var(--surface-hover);
-  border-color: var(--border-hover);
+.primary-action:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-control), inset 0 1px var(--inset-highlight);
 }
 
-.primary-action:hover {
-  color: #fff;
-  background: var(--accent-hover);
-}
-
 .primary-action:focus-visible,
-.spatial-toolbar button:focus-visible,
 .spatial-world:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
@@ -231,8 +215,54 @@ button {
   top: 18px;
   left: 50%;
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
   transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.spatial-toolbar-actions {
+  display: flex;
+  gap: 3px;
+  padding: 4px;
+  background: var(--surface-translucent);
+  border: 1px solid var(--border-subtle);
+  border-radius: 13px;
+  box-shadow: var(--shadow-control);
+  backdrop-filter: blur(14px);
+  pointer-events: auto;
+}
+
+.spatial-toolbar button {
+  padding: 6px 10px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.spatial-toolbar button:hover:not(:disabled) {
+  color: var(--accent);
+  background: var(--surface-tint);
+}
+
+.spatial-toolbar button:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.spatial-toolbar button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+}
+
+.spatial-toolbar p {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  white-space: nowrap;
 }
 
 .theme-button {
@@ -474,7 +504,11 @@ button {
   }
 
   .spatial-toolbar {
-    top: 12px;
+    top: 58px;
     left: 50%;
+  }
+
+  .spatial-toolbar p {
+    display: none;
   }
 }
