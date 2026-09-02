@@ -212,8 +212,8 @@ button {
 }
 
 .spatial-toolbar {
-  position: fixed;
-  z-index: 10;
+  position: absolute;
+  z-index: 4;
   top: 18px;
   left: 50%;
   display: flex;
@@ -814,7 +814,7 @@ button {
   text-align: right;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 560px) {
   .theme-button {
     top: 12px;
     left: 12px;
