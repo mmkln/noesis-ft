@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f9f8fe" />
+    <meta name="description" content="Noesis — logical knowledge graph." />
+    <title>Noesis</title>
+    <script>
+      (() => {
+        const storageKey = 'noesis:theme:v1';
+        let storedMode = 'system';
+        try {
+          storedMode = localStorage.getItem(storageKey) || 'system';
+        } catch {
+          // The system appearance remains available when storage is disabled.
+        }
+        const mode = ['system', 'light', 'dark'].includes(storedMode)
+          ? storedMode
+          : 'system';
+        const systemUsesDark = matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = mode === 'dark' || (mode === 'system' && systemUsesDark)
+          ? 'dark'
+          : 'light';
+
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset.themeMode = mode;
+        document.querySelector('meta[name="theme-color"]').content = theme === 'dark'
+          ? '#0e0d14'
+          : '#f9f8fe';
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-DgrW4iJl.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BP7_k45A.css">
+  </head>
+  <body>
+    <button class="theme-button" id="theme-button" type="button" aria-label="Appearance: System" title="Appearance: System">
+      <svg class="theme-icon theme-icon-system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="13" rx="2"></rect>
+        <path d="M8 21h8M12 17v4"></path>
+      </svg>
+      <svg class="theme-icon theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+      </svg>
+      <svg class="theme-icon theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"></path>
+      </svg>
+    </button>
+    <div id="account-menu-host"></div>
+
+    <main>
+      <section id="login-view" class="centered" hidden>
+        <div class="entry-card">
+          <span class="entry-mark" aria-hidden="true"></span>
+          <h1>Your knowledge graph</h1>
+          <p>Sign in to open Noesis.</p>
+          <button id="sign-in" class="primary-action" type="button">Sign in</button>
+        </div>
+      </section>
+
+      <section id="loading-view" class="centered">
+        <p>Loading Noesis…</p>
+      </section>
+
+      <section id="graph-view" hidden>
+        <div
+          id="spatial-world"
+          class="spatial-world"
+          tabindex="0"
+          aria-label="Knowledge graph"
+        >
+          <div class="spatial-toolbar" role="toolbar" aria-label="Spatial graph controls">
+            <div class="spatial-toolbar-actions">
+              <button id="fit-graph" type="button">Fit all</button>
+              <button id="reset-camera" type="button">Reset</button>
+            </div>
+            <p>Drag a node · Drag the background to rotate · Scroll to zoom</p>
+          </div>
+        </div>
+
+        <div class="spatial-inspector-stack">
+          <aside
+            class="spatial-inspector"
+            id="node-inspector"
+            aria-label="Selected knowledge node"
+            hidden
+          >
+            <header class="spatial-inspector-header">
+              <span
+                class="spatial-inspector-kind"
+                id="node-inspector-kind"
+                aria-hidden="true"
+              ><span></span></span>
+              <span
+                class="spatial-inspector-kind-label"
+                id="node-inspector-kind-label"
+              ></span>
+              <button
+                id="node-inspector-close"
+                type="button"
+                aria-label="Close node details"
+              >×</button>
+            </header>
+            <div class="spatial-inspector-body">
+              <h2 id="node-inspector-title"></h2>
+              <p id="node-inspector-body"></p>
+              <button
+                class="spatial-inspector-focus"
+                id="node-inspector-focus"
+                type="button"
+                aria-label="Focus selected node"
+                aria-keyshortcuts="F"
+                title="Focus selected node (F)"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 9V6a2 2 0 0 1 2-2h3"></path>
+                  <path d="M15 4h3a2 2 0 0 1 2 2v3"></path>
+                  <path d="M20 15v3a2 2 0 0 1-2 2h-3"></path>
+                  <path d="M9 20H6a2 2 0 0 1-2-2v-3"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <span>Focus in Spatial</span>
+                <kbd aria-hidden="true">F</kbd>
+              </button>
+            </div>
+          </aside>
+
+          <aside
+            class="spatial-connections-island"
+            id="node-inspector-connections"
+            aria-labelledby="node-inspector-connections-title"
+            hidden
+          >
+            <button
+              class="spatial-connections-toggle"
+              id="node-inspector-connections-toggle"
+              type="button"
+              aria-controls="node-inspector-connection-list"
+              aria-expanded="true"
+            >
+              <span id="node-inspector-connections-title">Connections</span>
+              <span id="node-inspector-connections-count"></span>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="m4 6 4 4 4-4"></path>
+              </svg>
+            </button>
+            <div
+              class="spatial-connections-list"
+              id="node-inspector-connection-list"
+            ></div>
+          </aside>
+        </div>
+
+        <p id="empty-state" class="empty-state" hidden>
+          Your knowledge graph is empty.
+        </p>
+      </section>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </main>
+
+  </body>
+</html>
